@@ -25,9 +25,9 @@ BOT_USERNAME       = "@RKXSMMbot"
 SMM_PANEL_URL      = "https://your-smm-panel.com/api/v2"   # তোমার প্যানেল URL
 
 # AutoPay Config (তোমার key গুলো সরাসরি আছে)
-AUTOPAY_API_KEY    = "EEBStiWfMC0sEVm0QyZPihVekfEF7JLIpLuwLcNGK5OPS5XsQA"
-AUTOPAY_SECRET_KEY = "EEBStiWfMC0sEVm0QyZPihVekfEF7JLIpLuwLcNGK5OPS5XsQA"
-AUTOPAY_BRAND_KEY  = "bDDu1ET75JxV3wlAQ8bmufxBU2lIqEfvNroIprvR"
+AUTOPAY_API_KEY    = "jp7ZgCTGj7X1YENParBkipjJnvyZIoNFDTLlOG3Y4ayNaue8bV"
+AUTOPAY_SECRET_KEY = "jp7ZgCTGj7X1YENParBkipjJnvyZIoNFDTLlOG3Y4ayNaue8bV"
+AUTOPAY_BRAND_KEY  = "Dl6Vzy8T33bbGiUybEDYffaZqp2ZxtJ0cP0Ss1HB"
 AUTOPAY_URL        = "https://pay.rxpay.top/api/payment/create"
 
 # ============================================================
@@ -602,7 +602,7 @@ def _service_keyboard_list():
 # ============================================================
 async def cmd_addbalance(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
-        await update.message.reply_text("❌ Only admin!")
+        await update.message.reply_text("</>error")
         return
     try:
         target = int(context.args[0])
