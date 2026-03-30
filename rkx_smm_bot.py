@@ -34,7 +34,7 @@ from telegram.ext import (
 #  CONFIG
 # ══════════════════════════════════════════════════════════════
 BOT_TOKEN     = os.environ.get("BOT_TOKEN",     "8331448370:AAGEdB0uDT0NnvN3DjFtuyGMRO2W8zuINYg")
-ADMIN_ID      = int(os.environ.get("ADMIN_ID",  "8387741218"))
+ADMIN_ID      = int(os.environ.get("ADMIN_ID",  "7761133429"))
 SMM_PANEL_KEY = os.environ.get("SMM_PANEL_KEY", "YOUR_SMM_PANEL_API_KEY")
 SMM_PANEL_URL = "https://your-smm-panel.com/api/v2"
 
