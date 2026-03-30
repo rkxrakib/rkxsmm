@@ -1,0 +1,13 @@
+services:
+  - type: worker
+    name: rkx-smm-bot
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python rkx_smm_bot.py
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: ADMIN_ID
+        sync: false
+      - key: SMM_PANEL_KEY
+        sync: false
