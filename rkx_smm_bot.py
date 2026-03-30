@@ -108,10 +108,11 @@ for cat_data in SERVICES.values():
 # ============================================================
 MAIN_KB = ReplyKeyboardMarkup(
     [
-        [KeyboardButton("🛒 অর্ডার করুন"),  KeyboardButton("💰 ব্যালেন্স")],
-        [KeyboardButton("💳 ডিপোজিট"),      KeyboardButton("📦 অর্ডার স্ট্যাটাস")],
-        [KeyboardButton("🆘 সাপোর্ট"),      KeyboardButton("📋 প্রাইস লিস্ট")],
-        [KeyboardButton("👥 রেফার করুন"),   KeyboardButton("🎁 ফ্রী সার্ভিস")],
+        [_btn("🛒 অর্ডার করুন", "primary")],
+        [_btn("💳 ডিপোজিট", "success"),        _btn("💰 ব্যালেন্স", "success")],
+        [_btn("🆘 সাপোর্ট", "danger"),          _btn("📦 অর্ডার স্ট্যাটাস", "primary")],
+        [_btn("📋 প্রাইস লিস্ট", "primary")],
+        [_btn("👥 রেফার করুন", "success"),      _btn("🎁 ফ্রী সার্ভিস", "success")],
     ],
     resize_keyboard=True
 )
@@ -119,17 +120,17 @@ MAIN_KB = ReplyKeyboardMarkup(
 def order_cat_kb():
     return ReplyKeyboardMarkup(
         [
-            [KeyboardButton("⚫ TikTok"),    KeyboardButton("🔵 Telegram")],
-            [KeyboardButton("🔴 YouTube"),   KeyboardButton("🔷 Facebook")],
-            [KeyboardButton("🟣 Instagram")],
-            [KeyboardButton("🎁 ফ্রী সার্ভিস"), KeyboardButton("🔙 মেইন মেনু")],
+            [_btn("⚫ TikTok", "primary"),      _btn("🔵 Telegram", "primary")],
+            [_btn("🔴 YouTube", "danger"),       _btn("🔷 Facebook", "primary")],
+            [_btn("🟣 Instagram", "success")],
+            [_btn("🎁 ফ্রী সার্ভিস", "success"), _btn("🔙 মেইন মেনু", "danger")],
         ],
         resize_keyboard=True
     )
 
 def _svc_kb(items: dict, back_label="🔙 Back"):
-    btns = [[KeyboardButton(s["name"])] for s in items.values()]
-    btns.append([KeyboardButton(back_label)])
+    btns = [[_btn(s["name"], "primary")] for s in items.values()]
+    btns.append([_btn(back_label, "danger")])
     return ReplyKeyboardMarkup(btns, resize_keyboard=True)
 
 def tiktok_kb():
@@ -147,7 +148,10 @@ def youtube_kb():
 def instagram_kb():
     return _svc_kb(SERVICES["instagram"]["items"])
 
-CANCEL_KB = ReplyKeyboardMarkup([[KeyboardButton("❌ বাতিল করুন")]], resize_keyboard=True)
+def _btn(text, style="primary"):
+    return KeyboardButton(text, api_kwargs={"style": style})
+
+CANCEL_KB = ReplyKeyboardMarkup([[_btn("❌ বাতিল করুন", "danger")]], resize_keyboard=True)
 
 WELCOME = (
     "━━━━━━━━━━━━━━━━━━━━━━\n"
