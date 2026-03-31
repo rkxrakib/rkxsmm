@@ -573,43 +573,30 @@ async def cmd_admin(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     await typ(ctx.bot, update.effective_chat.id)
     await _send_admin_panel(update.message, ctx)
 
-async async def _send_admin_panel(msg_obj, ctx):
+async def _send_admin_panel(msg_obj, ctx):
+    """Send/Edit admin panel — works for both message and callback"""
+    u2,o,op,oc,rv,pr,dp,bn = db_stats()
+    bal,cur = smm_balance()
+    bot_status = "✅ চালু" if gs("bot_active","1")=="1" else "❌ বন্ধ"
+    text = (
+        f"🔐 *{BOT_NAME} — Admin Panel*\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"🤖 Bot: {bot_status}\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"👥 ইউজার: *{u2}* | 🚫 Banned: *{bn}*\n"
+        f"📦 অর্ডার: *{o}* | ⏳{op} ✅{oc}\n"
+        f"💰 Revenue: *{rv:.2f}৳*\n"
+        f"📈 Profit: *{pr:.2f}৳*\n"
+        f"💳 Deposits: *{dp:.2f}৳*\n"
+        f"🖥️ Panel: *{bal} {cur}*\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━━━"
+    )
     try:
-        # টাইপিং একশন
-        await ctx.bot.send_chat_action(chat_id=msg_obj.chat_id, action=ChatAction.TYPING)
-        
-        u2, o, op, oc, rv, pr, dp, bn = db_stats()
-        bal, cur = smm_balance()
-        bot_status = "✅ চালু" if gs("bot_active", "1") == "1" else "❌ বন্ধ"
-
-        # HTML ফরম্যাটে সাজানো টেক্সট
-        text = (
-            f"<b>🔐 {BOT_NAME} — Admin Panel</b>\n"
-            f"━━━━━━━━━━━━━━━━━━━━━━━━\n"
-            f"<b>🤖 Bot Status:</b> {bot_status}\n"
-            f"━━━━━━━━━━━━━━━━━━━━━━━━\n"
-            f"👥 <b>ইউজার:</b> {u2} | 🚫 <b>ব্যান:</b> {bn}\n"
-            f"📦 <b>অর্ডার:</b> {o} (⏳ {op} | ✅ {oc})\n"
-            f"💰 <b>Revenue:</b> {rv:.2f}৳\n"
-            f"📈 <b>Profit:</b> {pr:.2f}৳\n"
-            f"💳 <b>Deposits:</b> {dp:.2f}৳\n"
-            f"🖥️ <b>Panel:</b> {bal} {cur}\n"
-            f"━━━━━━━━━━━━━━━━━━━━━━━━"
-        )
-
-        # চেক করা হচ্ছে এটি বাটন ক্লিক (callback) নাকি সরাসরি মেসেজ
-        if hasattr(msg_obj, 'edit_text') and not isinstance(msg_obj, Update):
-            try:
-                await msg_obj.edit_text(text, reply_markup=admin_kb(), parse_mode="HTML")
-            except:
-                await msg_obj.reply_text(text, reply_markup=admin_kb(), parse_mode="HTML")
-        else:
-            await msg_obj.reply_text(text, reply_markup=admin_kb(), parse_mode="HTML")
-
-    except Exception as e:
-        print(f"Admin Panel Error: {e}")
-        # সাধারণ টেক্সটে মেসেজ পাঠানো যদি HTML এ সমস্যা হয়
-        await ctx.bot.send_message(chat_id=msg_obj.chat_id, text="❌ এডমিন প্যানেল লোড করা সম্ভব হচ্ছে না।")
+        # called from callback edit
+        await msg_obj.edit_text(text, reply_markup=admin_kb(), parse_mode="Markdown")
+    except Exception:
+        # called from message send
+        await msg_obj.reply_text(text, reply_markup=admin_kb(), parse_mode="Markdown")
 
 # ══════════════════════════════════════════════════════════════
 #  ADMIN SHORTCUT COMMANDS
