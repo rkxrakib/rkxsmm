@@ -363,15 +363,15 @@ def db_save_deposit(uid, amt, phone, txn_ref):
 
 def db_stats():
     with _c() as c:
-        u  = c.execute("SELECT COUNT(*) FROM users").fetchone()[0]
-        o  = c.execute("SELECT COUNT(*) FROM orders").fetchone()[0]
-        op = c.execute("SELECT COUNT(*) FROM orders WHERE status='Processing'").fetchone()[0]
-        oc = c.execute("SELECT COUNT(*) FROM orders WHERE status='Completed'").fetchone()[0]
-        rv = c.execute("SELECT COALESCE(SUM(amount),0) FROM orders").fetchone()[0]
-        pr = c.execute("SELECT COALESCE(SUM(profit),0) FROM orders").fetchone()[0]
-        dp = c.execute("SELECT COALESCE(SUM(amount),0) FROM deposits WHERE status='Completed'").fetchone()[0]
-        bn = c.execute("SELECT COUNT(*) FROM users WHERE is_banned=1").fetchone()[0]
-    return u,o,op,oc,rv,pr,dp,bn
+        u  = c.execute("SELECT COUNT(*) FROM users").fetchone()[0] or 0
+        o  = c.execute("SELECT COUNT(*) FROM orders").fetchone()[0] or 0
+        op = c.execute("SELECT COUNT(*) FROM orders WHERE status='Processing'").fetchone()[0] or 0
+        oc = c.execute("SELECT COUNT(*) FROM orders WHERE status='Completed'").fetchone()[0] or 0
+        rv = c.execute("SELECT SUM(amount) FROM orders").fetchone()[0] or 0
+        pr = c.execute("SELECT SUM(profit) FROM orders").fetchone()[0] or 0
+        dp = c.execute("SELECT SUM(amount) FROM deposits WHERE status='Completed'").fetchone()[0] or 0
+        bn = c.execute("SELECT COUNT(*) FROM users WHERE is_banned=1").fetchone()[0] or 0
+    return u, o, op, oc, rv, pr, dp, bn
 
 def db_all_users(n=25, off=0):
     with _c() as c:
@@ -436,10 +436,14 @@ def smm_order(sid, link, qty):
 
 def smm_balance():
     try:
-        r=requests.post(SMM_PANEL_URL,timeout=15,
-                        data={"key":SMM_PANEL_KEY,"action":"balance"})
-        j=r.json(); return j.get("balance","N/A"),j.get("currency","BDT")
-    except: return "N/A","N/A"
+        # টাইমআউট ৫ সেকেন্ড করা হয়েছে
+        r = requests.post(SMM_PANEL_URL, timeout=5, data={"key": SMM_PANEL_KEY, "action": "balance"})
+        if r.status_code == 200:
+            j = r.json()
+            return j.get("balance", "N/A"), j.get("currency", "BDT")
+        return "N/A", "N/A"
+    except:
+        return "Offline", "N/A"
 
 def smm_status(order_id):
     try:
@@ -574,29 +578,40 @@ async def cmd_admin(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     await _send_admin_panel(update.message, ctx)
 
 async def _send_admin_panel(msg_obj, ctx):
-    """Send/Edit admin panel — works for both message and callback"""
-    u2,o,op,oc,rv,pr,dp,bn = db_stats()
-    bal,cur = smm_balance()
-    bot_status = "✅ চালু" if gs("bot_active","1")=="1" else "❌ বন্ধ"
-    text = (
-        f"🔐 *{BOT_NAME} — Admin Panel*\n"
-        f"━━━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"🤖 Bot: {bot_status}\n"
-        f"━━━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"👥 ইউজার: *{u2}* | 🚫 Banned: *{bn}*\n"
-        f"📦 অর্ডার: *{o}* | ⏳{op} ✅{oc}\n"
-        f"💰 Revenue: *{rv:.2f}৳*\n"
-        f"📈 Profit: *{pr:.2f}৳*\n"
-        f"💳 Deposits: *{dp:.2f}৳*\n"
-        f"🖥️ Panel: *{bal} {cur}*\n"
-        f"━━━━━━━━━━━━━━━━━━━━━━━━"
-    )
     try:
-        # called from callback edit
-        await msg_obj.edit_text(text, reply_markup=admin_kb(), parse_mode="Markdown")
-    except Exception:
-        # called from message send
-        await msg_obj.reply_text(text, reply_markup=admin_kb(), parse_mode="Markdown")
+        # টাইপিং একশন
+        await ctx.bot.send_chat_action(chat_id=msg_obj.chat_id, action=ChatAction.TYPING)
+        
+        # ডাটাবেস থেকে তথ্য আনা
+        u2, o, op, oc, rv, pr, dp, bn = db_stats()
+        
+        # প্যানেল ব্যালেন্স
+        bal, cur = smm_balance()
+        
+        bot_status = "✅ চালু" if gs("bot_active", "1") == "1" else "❌ বন্ধ"
+
+        # HTML ফরম্যাট ব্যবহার করা হয়েছে (Markdown এর বদলে)
+        text = (
+            f"<b>🔐 {BOT_NAME} — Admin Panel</b>\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"<b>🤖 Bot Status:</b> {bot_status}\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"👥 <b>ইউজার:</b> {u2} | 🚫 <b>ব্যান:</b> {bn}\n"
+            f"📦 <b>অর্ডার:</b> {o} (⏳ {op} | ✅ {oc})\n"
+            f"💰 <b>আয়:</b> {rv:.2f}৳\n"
+            f"📈 <b>লাভ:</b> {pr:.2f}৳\n"
+            f"💳 <b>ডিপোজিট:</b> {dp:.2f}৳\n"
+            f"🖥️ <b>প্যানেল:</b> {bal} {cur}\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━"
+        )
+
+        if hasattr(msg_obj, 'edit_text') and msg_obj.text:
+            await msg_obj.edit_text(text, reply_markup=admin_kb(), parse_mode="HTML")
+        else:
+            await msg_obj.reply_text(text, reply_markup=admin_kb(), parse_mode="HTML")
+    except Exception as e:
+        logging.error(f"Admin Panel Error: {e}")
+        await ctx.bot.send_message(chat_id=msg_obj.chat_id, text="❌ এডমিন প্যানেল লোড করতে সমস্যা হয়েছে।")
 
 # ══════════════════════════════════════════════════════════════
 #  ADMIN SHORTCUT COMMANDS
