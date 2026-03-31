@@ -12,8 +12,8 @@ from aiohttp import web
 # ═══════════════════════════════════════
 # CONFIG
 # ═══════════════════════════════════════
-TOKEN    = os.environ.get("BOT_TOKEN",     "YOUR_BOT_TOKEN_HERE")
-ADMIN_ID = int(os.environ.get("ADMIN_ID",  "123456789"))
+TOKEN    = os.environ.get("BOT_TOKEN",     "8331448370:AAGEdB0uDT0NnvN3DjFtuyGMRO2W8zuINYg")
+ADMIN_ID = int(os.environ.get("ADMIN_ID",  "7761133429"))
 API_URL  = f"https://api.telegram.org/bot{TOKEN}"
 
 SMM_URL  = "https://rxsmm.top/api/v2"
