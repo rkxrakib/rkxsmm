@@ -34,7 +34,7 @@ LOG_CHANNEL       = "@RKXSMMZONE"
 REQUIRED_CHANNELS = ["@RKXPremiumZone", "@RKXSMMZONE"]
 BOT_USERNAME      = "@RKXSMMbot"
 SUPPORT_USERNAME  = "@rkx_rakib"
-BOT_NAME          = "𝗥𝗞𝗫 𝗦𝗠𝗠 𝗭𝗢𝗡𝗘"
+BOT_NAME          = "RKX SMM ZONE"
 DB_PATH           = "rkx_bot.db"
 
 # Daily broadcast time (UTC) — সকাল ৬টা BD = UTC 00:00
@@ -47,14 +47,23 @@ DAILY_MINUTE = 0
 #  InlineKeyboard: style via api_kwargs
 # ══════════════════════════════════════════════════════════════
 def _kb(text: str, style: str = "primary") -> KeyboardButton:
-    """Colored ReplyKeyboardButton — Telegram Bot API 9.4+"""
-    return KeyboardButton(text, api_kwargs={"style": style})
+    """Colored ReplyKeyboardButton — Telegram Bot API 9.4+
+    পুরনো client এ style ignore হবে, crash হবে না।
+    """
+    try:
+        return KeyboardButton(text, api_kwargs={"style": style})
+    except Exception:
+        return KeyboardButton(text)
 
 def _ib(text: str, cb: str, style: str = None) -> InlineKeyboardButton:
-    """InlineKeyboardButton with optional color style"""
-    kwargs = {"style": style} if style else {}
-    return InlineKeyboardButton(text, callback_data=cb,
-                                api_kwargs=kwargs if kwargs else None)
+    """InlineKeyboardButton — style optional"""
+    try:
+        if style:
+            return InlineKeyboardButton(text, callback_data=cb,
+                                        api_kwargs={"style": style})
+        return InlineKeyboardButton(text, callback_data=cb)
+    except Exception:
+        return InlineKeyboardButton(text, callback_data=cb)
 
 # ══════════════════════════════════════════════════════════════
 #  PERMANENT REPLY KEYBOARD (স্ক্রিনশটের মতো)
@@ -506,10 +515,14 @@ async def is_member(bot, uid):
         except: return False
     return True
 
-async def typ(bot, cid, delay=0.5):
-    try: await bot.send_chat_action(cid, ChatAction.TYPING)
-    except: pass
-    await asyncio.sleep(delay)
+async def typ(bot, cid, delay=0.0):
+    """Send typing action — delay শুধু দরকার হলে দাও, default 0"""
+    try:
+        await bot.send_chat_action(cid, ChatAction.TYPING)
+        if delay > 0:
+            await asyncio.sleep(delay)
+    except:
+        pass
 
 def se(s): return "✅" if s=="Completed" else "⏳" if s=="Processing" else "❌"
 def u2s(un, fn): return f"@{un}" if un else (fn or "Unknown")
@@ -873,8 +886,6 @@ async def _do_confirm(q, ctx):
 
     await q.edit_message_text("⏳ অর্ডার প্রসেস হচ্ছে...")
     await ctx.bot.send_chat_action(q.message.chat.id, ChatAction.TYPING)
-    await asyncio.sleep(1.0)
-
     pid, err = smm_order(svc["sid"], link, qty)
     if err and not pid:
         await q.edit_message_text(f"❌ অর্ডার ব্যর্থ!\nকারণ: {err}\n\n🆘 {SUPPORT_USERNAME}"); return
@@ -918,7 +929,7 @@ async def txt(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     adm  = ctx.user_data.get("adm_step")
     fn   = fname(u)
 
-    await typ(ctx.bot, update.effective_chat.id, 0.4)
+    await typ(ctx.bot, update.effective_chat.id)
 
     if gs("bot_active","1") != "1" and u.id != ADMIN_ID:
         await update.message.reply_text("⚠️ বট সাময়িকভাবে বন্ধ।"); return
@@ -1193,7 +1204,7 @@ async def txt(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     if ds == "phone":
         amt5   = ctx.user_data.get("damt"); phone = t
         await update.message.reply_text("⏳ পেমেন্ট লিংক তৈরি হচ্ছে...")
-        await typ(ctx.bot, update.effective_chat.id, 1.0)
+        await typ(ctx.bot, update.effective_chat.id)
 
         import random as _r
         txn = f"RKX{u.id}{_r.randint(10000,99999)}"
