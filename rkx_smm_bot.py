@@ -22,8 +22,8 @@ from telegram.error import TelegramError
 # ============================================================
 # ✅ এখানে তোমার তথ্য দাও
 # ============================================================
-TELEGRAM_BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"   # BotFather থেকে নাও
-CHAT_ID = "YOUR_CHAT_ID_HERE"                 # Channel/Group ID (e.g. -1001234567890)
+TELEGRAM_BOT_TOKEN = "8427105381:AAGGEm4CkQ1E1_lHuULdBBtFMv2gpsh5G_o"   # BotFather থেকে নাও
+CHAT_ID = "7761133429"                 # Channel/Group ID (e.g. -1001234567890)
 
 # API Endpoints (HTML এর মতোই)
 CURRENT_API = "https://api.bdg88zf.com/api/webapi/GetGameIssue"
