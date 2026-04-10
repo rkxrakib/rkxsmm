@@ -1,11 +1,2 @@
-# RKX SMM Zone Bot — Requirements
-# Railway / Python 3.11+
-
-# Telegram Bot — job-queue needed for daily broadcast
-python-telegram-bot[job-queue]==21.10
-
-# HTTP requests
-requests==2.32.3
-
-# Needed by python-telegram-bot job-queue (APScheduler)
-APScheduler==3.10.4
+python-telegram-bot==21.5
+requests
